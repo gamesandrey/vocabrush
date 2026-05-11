@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tomorrow:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+<link rel="icon" href="character.png">
+<title>VocabRush</title>
+
+<style>
+body{
+    margin:0;
+    font-family:"TOMORROW", arial;
+    color:white;
+    background:linear-gradient(
+        -45deg,
+        #020617,
+        #0f172a,
+        #1e293b,
+        #0f172a
+    );
+
+    background-size:400% 400%;
+
+    animation:bgMove 5s ease infinite;
+}
+@keyframes bgMove{
+    0%{
+        background-position:0% 50%;
+    }
+
+    50%{
+        background-position:100% 50%;
+    }
+
+    100%{
+        background-position:0% 50%;
+    }
+}
+h2{
+    margin-top: 60px;
+}
+
+header{
+    background:#1e293b;
+    padding:12px;
+    text-align:center;
+    font-size:22px;
+}
+
+nav{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    background:#111827;
+    padding:10px;
+}
+
+nav button{
+    padding:10px;
+    border:none;
+    border-radius:8px;
+    background:#334155;
+    color:white;
+    cursor:pointer;
+}
+
+.page{
+    display:none;
+    padding:20px;
+}
+
+.active{
+    display:block;
+}
+
+/* VOCAB */
+
+#vocab input{
+    padding:10px;
+    margin:5px;
+    border-radius:8px;
+    border:none;
+}
+
+#vocab button{
+    padding:10px;
+    border:none;
+    border-radius:8px;
+    background:#22c55e;
+    color:white;
+    cursor:pointer;
+}
+
+.vocabCard{
+    background:#1f2937;
+    padding:10px;
+    margin:6px 0;
+    border-radius:10px;
+    display:flex;
+    justify-content:space-between;
+}
+
+/* GAME */
+
+#gameArea{
+    overflow:hidden;
+    position:fixed;
+    inset:0;
+    width:100vw;
+    height:100vh;
+    background:linear-gradient(to bottom,#0f172a,#020617);
+    overflow:hidden;
+}
+
+.platform{
+    position:absolute;
+    width:170px;
+    height:45px;
+    background:#334155;
+    text-align:center;
+    line-height:45px;
+    border-radius:10px;
+    font-weight:bold;
+}
+
+.player{
+    position:absolute;
+    width:100px;
+    height:100px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-position-y: 10px;
+    background-image: url("character.png");
+}
+
+.lava{
+    z-index: 100;
+    position:absolute;
+    bottom:0;
+    width:110%;
+    height:70px;
+    border-style: groove;
+    background: linear-gradient(orange,red)
+}
+
+#hud{
+    position:fixed;
+    top:15px;
+    left:50%;
+    transform:translateX(-50%);
+    display:flex;
+    gap:20px;
+    background:rgba(15,23,42,0.85);
+    backdrop-filter:blur(10px);
+    padding:14px 24px;
+    border:2px solid #334155;
+    border-radius:18px;
+    z-index:1000;
+    font-size:18px;
+    font-weight:bold;
+    box-shadow:0 0 20px rgba(0,0,0,0.4);
+}
+
+.hudBox{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    min-width:110px;
+}
+
+.hudLabel{
+    font-size:12px;
+    color:#94a3b8;
+    margin-bottom:4px;
+    text-transform:uppercase;
+    letter-spacing:1px;
+}
+
+.hudValue{
+    font-size:22px;
+    color:white;
+}
+
+#menuScreen{
+    position:fixed;
+    inset:0;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+
+    gap:20px;
+
+    background:linear-gradient(to bottom,#020617,#0f172a);
+
+    z-index:2000;
+}
+
+#gameTitle{
+    font-size:70px;
+    margin:0;
+
+    background:linear-gradient(to right,#38bdf8,#818cf8);
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+
+
+
+.menuBtn{
+    padding:16px 34px;
+    font-size:22px;
+
+    border:none;
+    border-radius:14px;
+
+    cursor:pointer;
+
+    background:#2563eb;
+    color:white;
+
+    transition:0.2s;
+}
+
+.menuBtn:hover{
+    transform:scale(1.05);
+    background:#3b82f6;
+}
+
+#gameOver{
+    position:absolute;
+    inset:0;
+    background:rgba(0,0,0,0.9);
+    display:none;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    z-index:10;
+}
+.selectedDifficulty{
+    border:3px solid white ;
+    box-shadow:0 0 15px white;
+}
+.correctPlatform{
+    background:#22c55e !important;
+    color:white;
+    box-shadow:0 0 15px #22c55e;
+}
+#leaderboardList{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+
+    max-width:600px;
+    margin:auto;
+
+    margin-top:20px;
+
+}
+.leaderboarditem{
+    background:#1f2937;
+    padding:10px;
+    margin:6px 0;
+    border-radius:10px;
+    display:flex;
+    justify-content:space-between;
+    border: rgba(255, 255, 255, 0.645) solid 2px;
+}
+.leaderboarditem:hover{
+    transform:scale(1.02);
+    transition:0.2s;
+    box-shadow:0 0 20px rgba(255,255,255,0.2);
+}
+.gold{
+    border:2px solid gold;
+    box-shadow:0 0 10px gold;
+}
+
+.silver{
+    border:2px solid silver;
+    box-shadow:0 0 10px silver;
+}
+
+.bronze{
+    border:2px solid #cd7f32;
+    box-shadow:0 0 10px #cd7f32;
+}
+.gold, .silver, .bronze{
+    animation:glow 2s infinite alternate;
+}
+
+@keyframes glow{
+    from{
+        transform:scale(1);
+    }
+    to{
+        transform:scale(1.03);
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>VocabRush</header>
+
+<nav>
+<button onclick="show('home')">Inicio</button>
+<button onclick="show('vocab')">Vocabulario</button>
+<button onclick="show('play')">Jugar</button>
+<button onclick="show('leaderboardPage')">
+Leaderboard
+</button>
+</nav>
+
+<div id="home" class="page active">
+<h2>Bienvenido a VocabRush</h2>
+VocabRush es un juego educativo de plataformas diseñado para aprender vocabulario de forma interactiva y divertida.
+En cada ronda se te muestra una palabra y debes saltar a la plataforma que contiene su significado correcto antes de que el tiempo se agote.
+
+Puedes elegir la dificultad, acumular puntos y mejorar tu habilidad mientras entrenas tu memoria de palabras sin darte cuenta.
+<br>
+<h2>Sobre el proyecto</h2>
+
+VocabRush ha sido desarrollado como un proyecto educativo interactivo que combina programación, diseño de videojuegos y aprendizaje de idiomas.
+
+El juego está construido con tecnologías web:
+
+<ul> <li>HTML para la estructura</li> <li>CSS para el diseño visual y la interfaz</li> <li>JavaScript para toda la lógica del juego (movimiento, físicas, rondas, puntuación y sistema de vocabulario)</li> </ul>
+
+El objetivo del proyecto es demostrar cómo un videojuego puede convertirse en una herramienta de aprendizaje activa, donde el jugador no memoriza de forma pasiva, sino que aprende a través de la acción, la repetición y la toma de decisiones bajo presión.
+<br>
+<h2>Cómo ayuda a aprender vocabulario</h2>
+
+Este juego mejora el aprendizaje porque:
+
+<ul> <li>Repite palabras en diferentes contextos</li> <li>Obliga a reaccionar rápido, reforzando la memoria</li> <li>Asocia significado con acción, no solo lectura</li> <li>Usa el error como parte del aprendizaje</li> <li>Motiva a mejorar puntuación y rendimiento</li> </ul>
+<h2>Objetivo</h2>
+
+El objetivo de VocabRush es convertir el estudio de vocabulario en una experiencia dinámica, donde aprender se sienta como jugar, y no como memorizar.
+</div>
+
+<div id="vocab" class="page">
+<h2>📚 Vocabulario</h2>
+
+<input id="w" placeholder="palabra">
+<input id="m" placeholder="significado">
+<button onclick="add()">Añadir</button>
+
+<div id="list"></div>
+</div>
+
+<div id="play" class="page">
+
+<div id="menuScreen">
+    <h1 id="gameTitle">🎮 VocabRush</h1>
+
+    <div id="difficultyMenu">
+
+    <p>Dificultad</p>
+
+    <button id="easyBtn" class="menuBtn"
+        onclick="setDifficulty('easy')">
+        Fácil
+    </button>
+
+    <button id="normalBtn" class="menuBtn"
+onclick="setDifficulty('normal')">
+Normal
+</button>
+
+<button id="hardBtn" class="menuBtn"
+onclick="setDifficulty('hard')">
+Difícil
+</button>
+
+    </div>
+    <button class="menuBtn" onclick="start()">
+        ▶ Empezar Juego
+    </button>
+
+    <button class="menuBtn" onclick="show('home')">
+        ⬅ Menú Principal
+    </button>
+</div>
+
+<div id="hud"></div>
+
+<div id="gameArea">
+<div class="lava"></div>
+<div id="gameOver"></div>
+</div>
+
+</div>
+<div id="leaderboardPage" class="page">
+
+    <h2>Leaderboard</h2>
+
+    <div id="leaderboardList"></div>
+
+</div>
+<audio id="bgMusic" loop>
+    <source src="music.mp3" type="audio/mpeg">
+</audio>
+<audio id="jump" src="jump.mp3"></audio>
+<audio id="disappear" src="disappear.mp3"></audio>
+<audio id="error"  src="error.mp3"></audio>
+<audio id="gameover" src="gameover.mp3"></audio>
+<script>
+
+let vocab = JSON.parse(localStorage.getItem("vocab")) || [
+    {word:"cat", meaning:"gato"},
+    {word:"dog", meaning:"perro"},
+    {word:"water", meaning:"agua"},
+    {word:"house", meaning:"casa"}
+];
+let leaderboard =
+JSON.parse(localStorage.getItem("leaderboard")) || [];
+
+function save(){
+    localStorage.setItem("vocab", JSON.stringify(vocab));
+    render();
+
+}
+
+function render(){
+
+    let list = document.getElementById("list");
+    list.innerHTML = "";
+
+    vocab.forEach((v,i)=>{
+
+        list.innerHTML += `
+        <div class="vocabCard">
+            <div>${v.word} - ${v.meaning}</div>
+            <button onclick="del(${i})">X</button>
+        </div>
+        `;
+    });
+}
+
+function add(){
+
+    let w = document.getElementById("w").value;
+    let m = document.getElementById("m").value;
+
+    if(!w || !m) return;
+
+    vocab.push({word:w,meaning:m});
+
+    save();
+
+    document.getElementById("w").value="";
+    document.getElementById("m").value="";
+}
+
+function del(i){
+    vocab.splice(i,1);
+    save();
+}
+
+function show(id){
+
+    document.querySelectorAll(".page")
+    .forEach(p=>p.classList.remove("active"));
+
+    document.getElementById(id)
+    .classList.add("active");
+    if (id="play"){
+        setDifficulty("normal");
+    }
+}
+
+let player;
+let platforms = [];
+let correctPlatform;
+let difficulty = "normal";
+let x = 50;
+let y = 300;
+let vy = 0;
+
+let gravity = 0.22;
+let jump = 6;
+
+let keys = {};
+
+let lives = 3;
+let score = 0;
+let pointsPerRound = 200;
+let time = 8;
+
+
+let timer;
+
+let gameState = "play";
+
+let animationId;
+let nextRoundTimeout;
+
+let moving = false;
+let spriteTimer = 0;
+let currentSprite = 0;
+const sprite1="walk1.png"
+const sprite2="walk2.png"
+
+
+
+function start(){
+
+    document.getElementById("menuScreen").style.display = "none";
+
+    lives = 3;
+    score = 0;
+    let music = document.getElementById("bgMusic");
+    music.currentTime = 0;
+    music.play();
+    hideGameOver();
+
+    nextRound();
+}
+
+function nextRound(){
+
+    clearInterval(timer);
+    clearTimeout(nextRoundTimeout);
+
+    gameState = "play";
+
+    if(difficulty === "easy"){
+        time = 10;
+    }
+
+    if(difficulty === "normal"){
+        time = 7;
+    }
+
+    if(difficulty === "hard"){
+        time = 4;
+    }
+
+
+
+    let game = document.getElementById("gameArea");
+
+    game.innerHTML = `
+    <div class="lava"></div>
+    <div id="gameOver"></div>
+    `;
+
+    let current =
+        vocab[Math.floor(Math.random()*vocab.length)];
+
+    document.getElementById("hud").innerHTML = `
+
+    <div class="hudBox">
+        <div class="hudLabel">Palabra</div>
+        <div class="hudValue">${current.word}</div>
+    </div>
+
+    <div class="hudBox">
+        <div class="hudLabel">Vidas</div>
+        <div class="hudValue">❤️ ${lives}</div>
+    </div>
+
+    <div class="hudBox">
+        <div class="hudLabel">Puntos</div>
+        <div class="hudValue">⭐ ${score}</div>
+    </div>
+
+    <div class="hudBox">
+        <div class="hudLabel">Tiempo</div>
+        <div class="hudValue" id="t">${time}</div>
+    </div>
+
+    `;
+
+    let options = [current.meaning];
+
+    while(options.length < 4){
+
+        let r =
+        vocab[Math.floor(Math.random()*vocab.length)].meaning;
+
+        if(!options.includes(r)){
+            options.push(r);
+        }
+    }
+
+    options.sort(()=>Math.random()-0.5);
+
+    let pos = [120,420,720,1020];
+
+    platforms = [];
+
+    options.forEach((o,i)=>{
+
+        let p = document.createElement("div");
+
+        p.className = "platform";
+
+        p.style.left = pos[i]+"px";
+        p.style.bottom = "140px";
+
+        p.innerText = o;
+
+        game.appendChild(p);
+
+        platforms.push(p);
+
+        if(o === current.meaning){
+            correctPlatform = p;
+        }
+    });
+       let spawnPlatform = null;
+
+    // buscamos la plataforma correcta o cualquiera válida
+ spawnPlatform = platforms[Math.floor(Math.random() * platforms.length)];
+
+x = spawnPlatform.offsetLeft + 60;
+y = 200;
+vy = 0;
+
+    player = document.createElement("div");
+
+    player.className = "player";
+
+    game.appendChild(player);
+
+    timer = setInterval(()=>{
+
+        if(gameState !== "play") return;
+
+        time--;
+
+        document.getElementById("t").innerText = time;
+
+        if(time <= 0){
+            timeoutRound();
+        }
+
+    },1000);
+
+    cancelAnimationFrame(animationId);
+    animationId = requestAnimationFrame(update);
+}
+
+function timeoutRound(){
+
+    if(gameState !== "play") return;
+
+    gameState = "timeout";
+
+    clearInterval(timer);
+    playSound("disappear")
+    platforms.forEach(p=>{
+        if(p !== correctPlatform){
+            p.remove();
+        }
+    });
+    correctPlatform.classList.add("correctPlatform");
+    nextRoundTimeout = setTimeout(()=>{
+
+        if(gameState !== "lava" && gameState !== "gameover"){
+            score+=pointsPerRound;
+            nextRound();
+        }
+
+
+    },2000);
+}
+
+function lavaDeath(){
+
+    if(gameState === "lava" || gameState === "gameover"){
+        return;
+    }
+    playSound("error")
+    gameState = "lava";
+
+    clearInterval(timer);
+
+    lives--;
+
+    if(lives <= 0){
+        gameOver();
+        return;
+    }
+
+    nextRoundTimeout = setTimeout(()=>{
+        nextRound();
+    },2000);
+}
+
+function backToMenu(){
+
+    document.getElementById("menuScreen").style.display = "flex";
+
+
+}
+
+function gameOver(){
+
+    gameState = "gameover";
+    playSound("gameover")
+    document.getElementById("bgMusic").pause();
+
+    let over = document.getElementById("gameOver");
+
+    over.style.display = "flex";
+
+    over.innerHTML = `
+        <h1>💀 GAME OVER</h1>
+        <button class="menuBtn" id="submitBtn" onclick="submitScore()">Subir Puntuación</button>
+        <button class="menuBtn" onclick="start()">Reiniciar</button>
+        <button class="menuBtn" onclick="backToMenu()">Menú Principal</button>
+    `;
+}
+
+
+function setDifficulty(d){
+
+    difficulty = d;
+
+    document.getElementById("easyBtn")
+    .classList.remove("selectedDifficulty");
+
+    document.getElementById("normalBtn")
+    .classList.remove("selectedDifficulty");
+
+    document.getElementById("hardBtn")
+    .classList.remove("selectedDifficulty");
+
+    if(d === "easy"){
+        document.getElementById("easyBtn")
+        .classList.add("selectedDifficulty");
+        pointsPerRound = 100;
+
+    }
+
+    if(d === "normal"){
+        document.getElementById("normalBtn")
+        .classList.add("selectedDifficulty");
+        pointsPerRound = 200;
+
+    }
+
+    if(d === "hard"){
+        document.getElementById("hardBtn")
+        .classList.add("selectedDifficulty");
+        pointsPerRound = 300;
+
+    }
+}
+
+function update(){
+
+    if(gameState === "play" || gameState === "timeout"){
+
+        if(keys["ArrowLeft"] || keys["a"]){
+            x -= 3;
+            moving=true
+            player.style.transform="scaleX(1)"
+        }else if(keys["ArrowRight"] || keys["d"]){
+            x += 3;
+            moving=true
+            player.style.transform="scaleX(-1)"
+        }else{
+            moving=false
+        }
+
+        if(
+            (keys["ArrowUp"] || keys["w"] || keys[" "])
+            && onGround()
+        ){
+            vy = jump;
+            playSound("jump")
+        }
+        if(moving){
+            spriteTimer++;
+
+        if(spriteTimer > 30){ // ~0.5s si 60fps
+            spriteTimer = 0;
+            currentSprite = 1 - currentSprite;
+        }
+
+        player.style.backgroundImage =
+        `url(${currentSprite === 0 ? sprite1 : sprite2})`;
+
+        } else {
+        // sprite idle (opcional: usa sprite1)
+        player.style.backgroundImage = `url(character.png)`;
+        }
+}
+
+    vy -= gravity;
+    y += vy;
+
+    if(y <= 70){
+        lavaDeath();
+    }
+
+    platforms.forEach(p=>{
+
+        if(!p.isConnected) return;
+
+        let px = parseInt(p.style.left);
+        let py = 140;
+
+        if(
+            x < px+150 &&
+            x+90 > px &&
+            y <= py+45 &&
+            y >= py+20 &&
+            vy <= 0
+        ){
+            y = py+45;
+            vy = 0;
+        }
+    });
+
+    player.style.left = x+"px";
+    player.style.bottom = y+"px";
+
+    animationId = requestAnimationFrame(update);
+}
+
+function onGround(){
+
+    for(let p of platforms){
+
+        if(!p.isConnected) continue;
+
+        let px = p.offsetLeft;
+        let py = 140;
+
+        if(
+            x+90 > px &&
+            x < px+170 &&
+            y >= py+40 &&
+            y <= py+50 &&
+            vy <= 0
+        ){
+            return true;
+        }
+    }
+
+    return false;
+}
+
+document.addEventListener("keydown",e=>{
+    keys[e.key]=true;
+});
+
+document.addEventListener("keyup",e=>{
+    keys[e.key]=false;
+});
+
+function hideGameOver(){
+
+    let g = document.getElementById("gameOver");
+
+    if(g){
+        g.style.display = "none";
+    }
+}
+function playSound(id){
+    let s = document.getElementById(id);
+    if(!s) return;
+    s.currentTime = 0;
+    s.play();
+}
+function submitScore(){
+    document.getElementById("submitBtn").style.display = "none";
+    let name = prompt("Escribe tu nombre");
+
+    if(!name || name.trim() === ""){
+        name = "Jugador";
+    }
+
+    let finalScore = score
+
+    leaderboard.push({
+        name:name,
+        score:finalScore,
+        difficulty:difficulty
+    });
+
+    leaderboard.sort((a,b)=>b.score-a.score);
+
+    leaderboard = leaderboard.slice(0,10);
+
+    localStorage.setItem(
+        "leaderboard",
+        JSON.stringify(leaderboard)
+    );
+
+    renderLeaderboard();
+}
+function renderLeaderboard(){
+
+    let list =
+    document.getElementById("leaderboardList");
+
+    list.innerHTML = "";
+
+    leaderboard.forEach((p,i)=>{
+    let rankClass = "";
+
+    if(i === 0){
+        rankClass = "gold";
+    }
+
+    if(i === 1){
+        rankClass = "silver";
+    }
+
+    if(i === 2){
+        rankClass = "bronze";
+    }
+        list.innerHTML += `
+        <div class="leaderboarditem ${rankClass}">
+
+            <div>
+                #${i+1}
+                -
+                ${p.name}
+            </div>
+
+            <div>
+                ${p.score} pts
+                (${p.difficulty})
+            </div>
+
+        </div>
+        `;
+    });
+}
+
+
+render();
+renderLeaderboard()
+</script>
+
+</body>
+</html>
